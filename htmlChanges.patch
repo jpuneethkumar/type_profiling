@@ -1,0 +1,44 @@
+diff --git a/profiler/printers/TypePrinterVisitor.cpp b/profiler/printers/TypePrinterVisitor.cpp
+index 357ff32..d09e9f6 100644
+--- a/profiler/printers/TypePrinterVisitor.cpp
++++ b/profiler/printers/TypePrinterVisitor.cpp
+@@ -62,8 +62,8 @@ TypePrinterVisitor::PrintBaseType(const TargetType &t)
+ 	size_t numSamples = sample.GetNumSamples(curOffset, t.GetSize());
+ 	double percent =  numSamples * 100.0 / sample.GetTotalSamples();
+ 
+-	fprintf(outfile, "\t%-16s%-16s (%zd bytes)\t%zd samples\t%6.2f%%\t\n",
+-	    prefix.c_str(), t.GetName()->c_str(),
++	fprintf(outfile, "  <tr>\n<td>%-16s%-16s</td>\n<td>(%zd bytes)</td>\n<td>%zd</"
++	    "td>\n<td>%6.2f%%</td>\n</tr>\n", prefix.c_str(), t.GetName()->c_str(),
+ 	    t.GetSize(), numSamples, percent);
+ }
+ 
+diff --git a/profiler/printers/TypeProfilePrinter.cpp b/profiler/printers/TypeProfilePrinter.cpp
+index 7e2e751..a7a25fa 100644
+--- a/profiler/printers/TypeProfilePrinter.cpp
++++ b/profiler/printers/TypeProfilePrinter.cpp
+@@ -60,13 +60,19 @@ TypeProfilePrinter::printProfile(const Profiler & profiler,
+ 			return a->GetTotalSamples() > b->GetTotalSamples();
+ 		});
+ 
+-	fprintf(m_outfile, "No DWARF: %zd, No .text: %zd, Disassemble Failed: %zd, No Register: %zd, No Variable: %zd\n",
+-	    noDwarf, noText, disassembleFailed, findRegFailed, findVarFailed);
+-	for (const auto * buffer : bufferList) {
+-		fprintf(m_outfile, "%s: %zd samples\n",
+-		    buffer->GetType().GetName()->c_str(), buffer->GetTotalSamples());
++	fprintf(m_outfile, "No DWARF: %zd, No .text: %zd, Disassemble Failed: %zd, No "
++	    "Register: %zd, No Variable: %zd\n", noDwarf, noText, disassembleFailed,
++	    findRegFailed, findVarFailed);
++	fprintf(m_outfile, "<!DOCTYPE html><html>\n<head>\n<style>\ntable, th, td {\n"
++	    "border:1px solid black;\nborder-collapse: collapse;\n}\n</style>\n</head>"
++	    "\n<table>\n<tr>\n<th>Member</th>\n<th>Type(Size)</th>\n<th>Number of "
++	    "Samples</th>\n<th>Percentage</th>\n</tr>\n");
+ 
++	for (const auto * buffer : bufferList) {
+ 		TypePrinterVisitor v(m_outfile, *buffer);
+ 		buffer->GetType().Accept(v);
+ 	}
++	fprintf(m_outfile, "</table>\n"
++	    "</body>\n"
++	    "</html>\n");
+ }
